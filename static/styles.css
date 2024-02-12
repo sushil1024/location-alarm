@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root{
+    --White: hsl(0, 0%, 100%);
+    --Lightpink: hsl(275, 100%, 97%);
+    --voilet: hsl(292, 16%, 49%);
+    --Darkpurple: hsl(292, 42%, 14%);
+
+    --ff-body: 'Work Sans';
+
+    --fw-heading: 700;
+    --fw-head: 600;
+    --fw-sub: 400;
+}
+html,
+body{
+    width: 100%;
+    height: 100%;
+}
+body{
+    font-family: var(--ff-body);
+    font-weight: var(--fw-sub);
+    line-height: 1.5;
+    background-color: var(--Lightpink);
+}
+
+h1,h2,p{
+    word-wrap: break-word;
+}
+figure{
+    width: 100%;
+    height: 100%;
+    min-height: 45vh;
+    background: url(images/background-pattern-mobile.svg) no-repeat center center/cover ;
+    transition: all .5s ease-in-out;
+}
+
+/* utility */
+.container{
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.card{
+    max-width: 500px;
+    background-color: #fff;
+    padding: 3rem 1rem;
+    transform: translateY(-100px);
+    margin: 0 auto;
+
+    box-shadow: 3px 5px 15px rgba(0, 0, 0, .4);
+
+    border: none;
+    border-radius: .5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+.btn{
+    cursor: pointer;
+    margin: 0 auto;
+    padding: 1rem 3rem;
+    border-radius: .5rem;
+    font-weight: var(--fw-heading);
+    border: none;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, .4);
+    background-color: var(--Darkpurple);
+    color: #fff;
+    transition: all .5s ease-in-out;
+}
+.btn:hover{
+    transform: scale(.97);
+    background-color:  rgb(69, 39, 75);
+}
+
+@media(min-width: 600px){
+    figure{
+        background:url(./images/background-pattern-desktop.svg) no-repeat center center/cover var(--Darkpurple);
+    }
+    .btn{
+        width: 15rem;
+    }
+    
+}
