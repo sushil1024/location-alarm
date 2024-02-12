@@ -52,7 +52,7 @@
         function showPosition(position) {
             var latitude = position.coords.latitude;
             var longitude = position.coords.longitude;
-            document.getElementById("demo").innerHTML = "Latitude: " + latitude + "<br>Longitude: " + longitude;
+            document.getElementById("demo").innerHTML = "Latitude, Longitude: " + latitude + ", " + longitude;
 
             // Send latitude and longitude to backend as JSON
             fetch('/send-location', {
