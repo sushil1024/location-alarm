@@ -26,7 +26,7 @@ async def send_location(location: Location, request: Request):
     api_key = f.read()
 
     gmaps = googlemaps.Client(key=api_key)
-    reverse_geocode_result = gmaps.reverse_geocode((19.013944, 72.827631))
+    reverse_geocode_result = gmaps.reverse_geocode((latitude, longitude))
 
     current_address = reverse_geocode_result[0]['formatted_address']
 
