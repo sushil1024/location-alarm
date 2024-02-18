@@ -8,34 +8,28 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-class Location(BaseModel):
-    latitude: float
-    longitude: float
+current_address = "some place on earth"
 
 @app.get("/")
-async def read_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def read_index(request: Request, latitude: float = None, longitude: float = None):
+    global current_address
+    try:
+        if (latitude is not None) and (longitude is not None):
+            f = open('api_key.txt', 'r')
+            api_key = f.read()
 
-@app.post("/send-location")
-async def send_location(location: Location, request: Request):
-    latitude = location.latitude
-    longitude = location.longitude
-    print(f"Latitude, Longitude: {location.latitude}, {location.longitude}")
+            gmaps = googlemaps.Client(key=api_key)
+            reverse_geocode_result = gmaps.reverse_geocode((latitude, longitude))
+            current_address = reverse_geocode_result[0]['formatted_address']
 
-    f = open('api_key.txt', 'r')
-    api_key = f.read()
+    except Exception as e:
+        print("Error in latitude and longitude: ", e)
+    return templates.TemplateResponse("index.html", {"request": request, "latitude": latitude, "longitude": longitude, "current_address": current_address})
 
-    gmaps = googlemaps.Client(key=api_key)
-    reverse_geocode_result = gmaps.reverse_geocode((latitude, longitude))
 
-    current_address = reverse_geocode_result[0]['formatted_address']
+@app.get("/get-current-address")
+async def send_location(request: Request):
+    global current_address
 
-    print(current_address)
-
-    if 'grant road' in str(current_address).lower():
-        print("We're in grant road")
-    else:
-        print("We're not anywhere")
-
-    return templates.TemplateResponse("index.html", {"request": request, "latitude": latitude, "longitude": longitude})
+    return templates.TemplateResponse("index.html", {"request": request, "current_address": current_address})
 

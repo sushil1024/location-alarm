@@ -24,20 +24,12 @@
                     <h1>Location Access</h1>
                 </header>
                 <p id="demo">Click the button to get your location.</p>
-                <button class="btn" onclick="getLocation()">Get Location</button>
+                <!-- <p id="demo">Current Address: {{ current_address }}</p> -->
+                <button class="btn" onclick="getLocation()">Submit</button>
             </div>
-        </main> <!--main ends here-->
+        </main>
         
-        <form id="locationForm" action="/send-location" method="post" style="display: none;">
-            <input type="hidden" id="latitudeInput" name="latitude">
-            <input type="hidden" id="longitudeInput" name="longitude">
-        </form>
-        
-    </div> <!--container ends here-->
-
-
-
-
+    </div>
 
 
     <script>
@@ -52,19 +44,23 @@
         function showPosition(position) {
             var latitude = position.coords.latitude;
             var longitude = position.coords.longitude;
-            document.getElementById("demo").innerHTML = "Latitude, Longitude: " + latitude + ", " + longitude;
 
             // Send latitude and longitude to backend as JSON
-            fetch('/send-location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json', // Specify JSON content type
-                },
-                body: JSON.stringify({ latitude: latitude, longitude: longitude }), // Convert data to JSON format
+            fetch('/?latitude=' + latitude + '&longitude=' + longitude, {
+                method: 'GET'
             })
             .then(response => response.json())
             .then(data => console.log(data))
             .catch(error => console.error('Error:', error));
+
+            fetch('/get-current-address')
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+
+            var current_address = "{{ current_address }}";
+            document.getElementById("demo").innerHTML = "Latitude, Longitude: " + latitude + ", " + longitude;
+            document.getElementById("demo").innerHTML += "<br>Current Address: " + current_address;
         }
     </script>
 </body>
