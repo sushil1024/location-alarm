@@ -10,15 +10,16 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # current_address = "some place on earth"
 session_addresses = {}
+dest = {}
+alarmflag = {}
 
 @app.get("/")
-async def read_index(request: Request, latitude: float = None, longitude: float = None):
+async def read_index(request: Request, latitude: float = None, longitude: float = None, destination: str = None):
     global session_addresses
+    global dest
+    global alarmflag
     ip_address = request.client.host
     current_address = session_addresses.get(ip_address, "some place on earth")
-
-    print("IP addess: ", ip_address)
-    print("session_addresses: ", session_addresses)
 
     try:
         if (latitude is not None) and (longitude is not None):
@@ -28,10 +29,22 @@ async def read_index(request: Request, latitude: float = None, longitude: float 
             gmaps = googlemaps.Client(key=api_key)
             reverse_geocode_result = gmaps.reverse_geocode((latitude, longitude))
             current_address = reverse_geocode_result[0]['formatted_address']
+            session_addresses[ip_address] = current_address
+            dest[ip_address] = destination
+
+            if str(dest[ip_address]).lower() in str(session_addresses[ip_address]).lower() and str(dest[ip_address]).lower() != '':
+                alarmflag[ip_address] = '1'
+                print("UTH MADARCHOD!..")
+            else:
+                alarmflag[ip_address] = ''
+
+            print("IP addess: ", ip_address)
+            print("session_addresses: ", session_addresses)
+            print("dest: ", dest)
 
     except Exception as e:
         print("Error in latitude and longitude: ", e)
-    return templates.TemplateResponse("index.html", {"request": request, "latitude": latitude, "longitude": longitude, "current_address": current_address})
+    return templates.TemplateResponse("index.html", {"request": request, "latitude": latitude, "longitude": longitude, "current_address": current_address, "alarmflag": alarmflag})
 
 
 @app.get("/get-current-address")
