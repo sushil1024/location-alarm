@@ -8,11 +8,18 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-current_address = "some place on earth"
+# current_address = "some place on earth"
+session_addresses = {}
 
 @app.get("/")
 async def read_index(request: Request, latitude: float = None, longitude: float = None):
-    global current_address
+    global session_addresses
+    ip_address = request.client.host
+    current_address = session_addresses.get(ip_address, "some place on earth")
+
+    print("IP addess: ", ip_address)
+    print("session_addresses: ", session_addresses)
+
     try:
         if (latitude is not None) and (longitude is not None):
             f = open('api_key.txt', 'r')
@@ -29,7 +36,10 @@ async def read_index(request: Request, latitude: float = None, longitude: float 
 
 @app.get("/get-current-address")
 async def send_location(request: Request):
-    global current_address
+    global session_addresses
+    ip_address = request.client.host
+    current_address = session_addresses.get(ip_address, "some place on earth")
+
 
     return templates.TemplateResponse("index.html", {"request": request, "current_address": current_address})
 
