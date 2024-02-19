@@ -3,10 +3,39 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import googlemaps
+import mysql.connector
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Function to read database credentials from the file
+def read_db_config(filename):
+    db_config = {}
+    with open(filename, 'r') as file:
+        for line in file:
+            key, value = line.strip().split('=')
+            db_config[key] = value
+    return db_config
+
+# Read database credentials from the file
+db_credentials = read_db_config('dbconfig.txt')
+
+print("db_credentials from txt: ", db_credentials)
+
+# mysql database connection
+db_connection = mysql.connector.connect(
+    host=db_credentials['host'],
+    user=db_credentials['user'],
+    password=db_credentials['password'],
+    database=db_credentials['database']
+)
+db_cursor = db_connection.cursor()
+
+@app.on_event("shutdown")
+def shutdown_event():
+    db_cursor.close()
+    db_connection.close()
 
 # current_address = "some place on earth"
 session_addresses = {}
@@ -31,6 +60,20 @@ async def read_index(request: Request, latitude: float = None, longitude: float 
             current_address = reverse_geocode_result[0]['formatted_address']
             session_addresses[ip_address] = current_address
             dest[ip_address] = destination
+
+            # Check if the IP address already exists in the database
+            db_cursor.execute("SELECT * FROM users WHERE ip = %s", (ip_address,))
+            existing_user = db_cursor.fetchone()
+
+            if existing_user:
+                # Update the existing user's data
+                db_cursor.execute("UPDATE users SET latitude = %s, longitude = %s, lastonline = CONVERT_TZ(NOW(), '+00:00', '+05:30') WHERE ip = %s", (latitude, longitude, ip_address))
+            
+            else:
+                # Insert new user's data
+                db_cursor.execute("INSERT INTO users (ip, latitude, longitude, lastonline) VALUES (%s, %s, %s, CONVERT_TZ(NOW(), '+00:00', '+05:30'))", (ip_address, latitude, longitude))
+
+            db_connection.commit()
 
             if str(dest[ip_address]).lower() in str(session_addresses[ip_address]).lower() and str(dest[ip_address]).lower() != '':
                 alarmflag[ip_address] = '1'
